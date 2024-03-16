@@ -1,0 +1,184 @@
+.model
+.stack 100h
+.386
+
+
+
+.code
+MAIN PROC
+		mov ax,@data
+		mov ds,ax
+		
+		
+	
+		mov si,0080h
+		mov dl,ES:[si]    ; store length in dl 
+		cmp dl,0 
+		jg Case2 
+		
+		 ;Case_1  
+			mov ax,073Fh  
+			xor bx,bx
+			mov cx,0080H
+			jmp Next 
+			
+			
+			
+		Case2: 	
+			; Check either a string contains the :(colon) 
+			mov si,0080h
+			mov dl, ES:[si]
+			dec dl            ;Skip Space  
+			mov si,0082h
+			mov ch,0
+			
+repeat10:		
+			mov dh, ES:[si]
+			cmp dh,':'   ; if colon found, Read segment address
+			
+			je ColonFound
+			inc si
+			dec dl
+			jnz repeat10
+			
+			
+			; loop terminates,Therefore Colon not Found 
+			mov si,0080h  			;read/Extract offset 
+			mov dl,ES:[si]
+			mov si,0082h
+			dec dl           ;skip space  aFter 
+			call ReadOffset
+			cmp dl,0	; skip space
+			jg ReadRangeFunc
+				mov cx,127 ;if Range is not Given 
+				jmp next
+			ReadRangeFunc:
+				inc si
+				call ReadRangee
+				
+		
+
+		; Execute The
+		           
+		ColonFound:        	; Extract/Read the Segment Address   
+			cmp dl,1      	 ; 073F:    (invalid input ) 
+			jE InvalidInput 
+				
+			mov si,0080h			
+			mov dl,ES:[si] ; store length in dl 
+			dec dl          ;Skip space
+			mov si,0082h
+			mov cl,0
+			xor ax,ax 
+			call ReadSegmentAddress                 ; Ax contains the Segment Address
+			;then 
+			dec dl          ;skip Colon length after read segment Address	
+			inc si          ; skip colon  address 
+			cmp dl,0
+			
+			jg ReadOffsetFunc 
+				; it means only segment Address: (073F: which is invalid input ) 
+				jmp invalidInput 
+			
+		
+			ReadOffsetfunc:			
+				
+				Call Readoffset
+				cmp dl,0 
+
+				je  next
+				    inc si  ;skip space 
+				    dec dl  ;skip space length 
+					call ReadRangee              ;no range given
+						;LENGTH IS ZERO 
+			
+		InvalidInput:
+			
+		
+		Next:
+			mov ah,4ch
+			int 21h
+		
+main endp
+
+
+
+ReadSegmentAddress Proc
+
+		xor ax,ax 
+repeat40:	
+
+		mov dh,Es:[si]
+		cmp dh, ':'
+		je Exit40
+			Call GetBinary 	
+			shl ax,4
+			and dh,0FH
+			or al,dh
+			inc si
+			dec dl
+			jnz repeat40
+
+		Exit40:
+
+
+ret 
+ReadSegmentAddress Endp 
+
+
+GetBinary PROC
+		 
+		cmp dh,39h
+		jle digit20
+			sub dh,37h
+			jmp exit200
+		Digit20:
+			sub dh,30h
+				
+		exit200:
+		
+RET 
+GetBinary Endp 
+
+
+
+ReadOffset PROC
+		xor bx,bx
+repeat30:	
+		mov dh,Es:[si]
+		cmp dh,' '
+		je exit30	
+			call GetBinary 
+			shl bx,4
+			or bl,dh
+			inc si
+			dec dl
+			jnz repeat30 
+	
+	
+	exit30:
+
+ret
+ReadOffset endp 
+
+
+
+
+ReadRangee PROC
+xor cx,cx
+repeat50:	
+		mov dh,Es:[si]
+		call GetBinary 
+		shl cx,4
+		or cl,dh
+		inc si
+		dec dl
+	jnz repeat50
+	
+	
+ret 
+ReadRangee endp 
+
+
+
+end Main
