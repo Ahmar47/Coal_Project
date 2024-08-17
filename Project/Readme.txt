@@ -1,6 +1,6 @@
 # AssemblyAddressParser
 
-## Overview
+# Overview
 This project implements an address parser using x86 assembly language. The parser reads a segment address, offset, and optional range from an input string and processes it accordingly.
 
 ## Setup
@@ -11,4 +11,4 @@ This project implements an address parser using x86 assembly language. The parse
 ### Assembling and Running
 1. Clone the repository:
    ```sh
-   git clone https://github.com/your-username/AssemblyAddressParser.git
+   git clone https://github.com/Ahmar47/AssemblyAddressParser.git
